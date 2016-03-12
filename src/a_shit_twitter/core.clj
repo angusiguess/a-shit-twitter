@@ -51,8 +51,8 @@
   (str "A " (first (rand-nth (get-words-by-syll 1))) " " (first (rand-nth (get-words-by-syll 2))) " THATS THAT SHIT I DON'T LIKE"))
 
 (defn -main [& args]
-  (loop [dont-like (dont-like)]
-    (println "Tweeting: " dont-like)
-    (post-status dont-like)
+  (loop [status (dont-like)]
+    (println "Tweeting: " status)
+    (post-status status)
     (Thread/sleep (* 1000 60 5))
     (recur (dont-like))))
