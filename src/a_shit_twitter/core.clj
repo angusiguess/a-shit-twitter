@@ -1,5 +1,20 @@
 (ns a-shit-twitter.core
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [twitter.oauth :as oauth]
+            [twitter.api.restful :as api]
+            [clojure.edn :as edn]))
+
+;; Twitter stuff
+
+(def creds (let [{:keys [app-consumer-key app-consumer-secret user-access-token user-access-token-secret]} (edn/read-string (slurp "resources/tokens.edn"))]
+             (oauth/make-oauth-creds app-consumer-key
+                                     app-consumer-secret
+                                     user-access-token
+                                     user-access-token-secret)))
+
+(defn post-status [status]
+  (api/statuses-update :oauth-creds creds
+                       :params {:status status}))
 
 ;; The CMU pronunciation dictionary has a machine readable pronunciation key that
 ;; we can use to search words for syllable counts. Let's write a filter for every
@@ -33,5 +48,11 @@
 (get-words-by-syll 1)
 
 (defn dont-like []
-  (println "A" (first (rand-nth (get-words-by-syll 1))) (first (rand-nth (get-words-by-syll 2))) "THATS THAT SHIT I DON'T LIKE"))
+  (str "A " (first (rand-nth (get-words-by-syll 1))) " " (first (rand-nth (get-words-by-syll 2))) " THATS THAT SHIT I DON'T LIKE"))
 
+(defn -main [& args]
+  (loop [dont-like (dont-like)]
+    (println "Tweeting: " dont-like)
+    (post-status dont-like)
+    (Thread/sleep (* 1000 60 5))
+    (recur (dont-like))))
